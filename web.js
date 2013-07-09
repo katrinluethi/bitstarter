@@ -1,15 +1,15 @@
 var express = require('express');
-
+var fs = require('fs');
 var app = express.createServer(express.logger());
-var buffer = new Buffer();
-var len=0;
-fs.readFile('/etc/passwd', function (err, data) {
+var buffer = new Buffer(0);
+
+fs.readFile('index.html', function (err, data) {
     if (err) throw err;
-    len=buffer.write(data, "utf-8");
+	buffer = new Buffer(data);
 });
 
 app.get('/', function(request, response) {
-  response.send(buffer.toString("utf-8", 0, len));
+  response.send(buffer.toString("utf-8"));
 });
 
 var port = process.env.PORT || 5000;
