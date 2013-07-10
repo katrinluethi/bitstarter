@@ -52,7 +52,10 @@ var buildCallback = function(checksfile){
 	    console.error('Error: '+util.format(response.message));
 	} else {
 	    console.log("Doing the url stuff...");
-	    return checkHtmlFile(result, checksfile);
+	    // This is ugly, if anyone knows how to do it directly, please comment!
+	    var htmlfile = "url_result.html";
+	    fs.writeFileSync(htmlfile, result);
+	    checkHtmlFile(htmlfile, checksfile);
 	}
     };
     return callbackFunction;
@@ -70,6 +73,9 @@ var checkHtmlFile = function(htmlfile, checksfile) {
         var present = $(checks[ii]).length > 0;
         out[checks[ii]] = present;
     }
+
+    var outJson = JSON.stringify(out, null, 4);
+    console.log(outJson);
     return out;
 };
 
@@ -85,16 +91,14 @@ if(require.main == module) {
         .option('-u, --url <url>', 'Url to check')
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
         .parse(process.argv);
-    var checkJson;
-//    if(program.file != null){
-//	console.log("checking normal file");
-//	checkJson = checkHtmlFile(program.file, program.checks);
-  /*  } else*/ if(program.url != null){
+    // is this really how it is done? could not find any documentation. If you know a better way, please comment!
+    if(program.url){
 	console.log("Going to download from web...");
-	checkJson = downloadFromUrl(program.url, program.checks);
-    }
-    var outJson = JSON.stringify(checkJson, null, 4);
-    console.log(outJson);
+	downloadFromUrl(program.url, program.checks);
+    } else {
+	console.log("Checking normal file");
+	checkHtmlFile(program.file, program.checks);
+    } 
 } else {
     exports.checkHtmlFile = checkHtmlFile;
 }
